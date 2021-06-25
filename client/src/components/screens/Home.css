@@ -9,3 +9,14 @@
     text-align: initial !important;
     padding: 0px 20px !important;
 }
+
+/* .card-image {
+    max-height: 300px;
+} */
+
+.card-image img {
+    height: fit-content;
+    max-height: 300px;
+    min-height: 200px;
+    min-width: 200px;
+}
