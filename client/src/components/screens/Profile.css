@@ -1,0 +1,43 @@
+.profile{
+    max-width: 650px;
+    margin: 0px auto;
+}
+
+.profile__avatar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile__avatar> button {
+    width: fit-content;
+}
+
+.profile__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border-bottom: 1px solid gray;
+    margin-bottom: 25px;
+    margin-top: 10px;
+}
+
+.profile__infoDetails {
+    display: flex;
+    width: 110%;
+    justify-content: space-between;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.item {
+    width: 30%;
+}
+
+.btn-follow {
+    margin: 10px;
+}
