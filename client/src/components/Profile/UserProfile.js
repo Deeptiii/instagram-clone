@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
-import "./Profile.css";
+// import "./Profile.css";
 import { UserContext } from "../../App";
 import { useParams } from "react-router-dom";
+import { Wrapper } from "./Profile";
+import { Avatar, Button } from "@material-ui/core";
 
 function UserProfile() {
     const [userProfile, setProfile] = useState(null);
@@ -107,50 +109,73 @@ function UserProfile() {
     };
 
     return (
-        <>
+        <Wrapper>
             {!userProfile ? (
                 <h2>Loading</h2>
             ) : (
-                <div className="profile">
-                    <div className="profile__header">
-                        <div className="profile__avatar">
-                            <img
-                                style={{
-                                    width: "160px",
-                                    height: "160px",
-                                    borderRadius: "50%"
-                                }}
-                                src={userProfile.user.pic}
-                                alt=""
-                            />
+                <div className='profile'>
+                    <div className='profile__header'>
+                        <div className='profile__avatar'>
+                            <Avatar src={userProfile.user.pic} alt='' />
                         </div>
-                        <div className="profile__info">
-                            <h4>{userProfile.user.name}</h4>
-                            <h5>{userProfile.user.email}</h5>
-                            <div className="profile__infoDetails">
-                                <h6>{userProfile.posts.length} Posts</h6>
-                                <h6>
-                                    {userProfile.user.followers.length}{" "}
-                                    Followers
-                                </h6>
-                                <h6>
-                                    {userProfile.user.following.length}{" "}
-                                    Following
-                                </h6>
+                        <div className='profile__info'>
+                            <div className='profile_info_header'>
+                                <span className='profile_name'>
+                                    {userProfile.user.name}
+                                </span>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => handleFollow()}>
+                                    {showFollow ? "Follow" : "Unfollow"}
+                                </Button>
                             </div>
-                            <button
-                                className="btn waves-effect waves-light #2196f3 blue btn-follow"
-                                onClick={() => handleFollow()}
-                            >
-                                {showFollow ? "Follow" : "Unfollow"}
-                            </button>
+
+                            <ul className='profile__infoDetails'>
+                                <li className='info-item'>
+                                    <span>
+                                        <span className='info-item-value'>
+                                            {" "}
+                                            {userProfile.posts.length}{" "}
+                                        </span>
+                                        Posts
+                                    </span>
+                                </li>
+                                <li className='info-item'>
+                                    <span>
+                                        <span className='info-item-value'>
+                                            {" "}
+                                            {
+                                                userProfile.user.followers
+                                                    .length
+                                            }{" "}
+                                        </span>
+                                        Followers
+                                    </span>
+                                </li>
+                                <li className='info-item'>
+                                    <span>
+                                        <span className='info-item-value'>
+                                            {" "}
+                                            {
+                                                userProfile.user.following
+                                                    .length
+                                            }{" "}
+                                        </span>
+                                        Following
+                                    </span>
+                                </li>
+                            </ul>
+                            <div className='info-mail'>
+                                <span>{userProfile.user.email}</span>
+                            </div>
                         </div>
                     </div>
-                    <div className="gallery">
+                    <div className='gallery'>
                         {userProfile.posts.map((item) => (
                             <img
                                 key={item._id}
-                                className="item"
+                                className='item'
                                 src={item.photo}
                                 alt={item.title}
                             />
@@ -158,7 +183,7 @@ function UserProfile() {
                     </div>
                 </div>
             )}
-        </>
+        </Wrapper>
     );
 }
 

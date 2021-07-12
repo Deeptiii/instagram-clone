@@ -1,74 +1,79 @@
 import React, { useEffect, createContext, useReducer, useContext } from "react";
-import "./App.css";
-import Navbar from "./components/Navbar";
-import { BrowserRouter, Route, Switch, useHistory } from "react-router-dom";
-import Home from "./components/screens/Home";
-import SubscribedUserPosts from "./components/screens/SubscribedUserPosts";
-import Signin from "./components/screens/Signin";
-import Profile from "./components/screens/Profile";
-import UserProfile from "./components/screens/UserProfile";
-import Signup from "./components/screens/Signup";
-import CreatePost from "./components/screens/CreatePost";
-import { reducer, initialState } from "./reducers/userReducer";
 
+import {
+    BrowserRouter as Router,
+    Route,
+    Switch,
+    useHistory
+} from "react-router-dom";
+
+import Navbar from "./components/Navbar/Navbar";
+import Home from "./components/Home/Home";
+import Explore from "./components/Explore/Explore";
+import Profile from "./components/Profile/Profile";
+import Login from "./components/Authentication/Login";
+
+import { reducer, initialState } from "./reducer/userReducer";
+import SignUp from "./components/Authentication/SignUp";
+import UserProfile from "./components/Profile/UserProfile";
+import CreatePost from "./components/CreatePost/CreatePost";
 export const UserContext = createContext();
 
 const Routing = () => {
     const history = useHistory();
-    const dispatch = useContext(UserContext).dispatch;
+    const { state, dispatch } = useContext(UserContext);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
             dispatch({ type: "SET_USER", payload: user });
         } else {
-            history.push("/signin");
+            history.push("/login");
         }
-    }, [history, dispatch]);
-
+    }, []);
     return (
-        <Switch>
-            <Route exact path="/">
-                <Home />
-            </Route>
+        <>
+            {state && <Navbar />}
+            <Switch>
+                <Route exact path='/'>
+                    <Home />
+                </Route>
+                <Route exact path='/login'>
+                    <Login />
+                </Route>
+                <Route exact path='/signup'>
+                    <SignUp />
+                </Route>
 
-            <Route path="/signup">
-                <Signup />
-            </Route>
+                <Route path='/profile/:userid'>
+                    <UserProfile />
+                </Route>
 
-            <Route path="/signin">
-                <Signin />
-            </Route>
+                <Route exact path='/explore'>
+                    <Explore />
+                </Route>
+                <Route exact path='/create'>
+                    <CreatePost />
+                </Route>
 
-            <Route exact path="/profile">
-                <Profile />
-            </Route>
-
-            <Route path="/profile/:userid">
-                <UserProfile />
-            </Route>
-
-            <Route path="/create">
-                <CreatePost />
-            </Route>
-
-            <Route path="/myfollowingposts">
-                <SubscribedUserPosts />
-            </Route>
-        </Switch>
+                <Route exact path='/profile'>
+                    <Profile />
+                </Route>
+            </Switch>
+        </>
     );
 };
 
-function App() {
+const App = () => {
     const [state, dispatch] = useReducer(reducer, initialState);
+
     return (
         <UserContext.Provider value={{ state, dispatch }}>
-            <BrowserRouter>
-                <Navbar />
+            <Router>
                 <Routing />
-            </BrowserRouter>
+            </Router>
         </UserContext.Provider>
     );
-}
+};
 
 export default App;
