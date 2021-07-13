@@ -7,8 +7,6 @@ const User = mongoose.model("User");
 
 const requireLogin = require("../middleware/requireLogin");
 
-const { JWT_SECRET } = require("../keys");
-
 router.get("/protected", requireLogin, (req, res) => {
     res.send("HEllo User");
 });
