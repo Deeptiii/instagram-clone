@@ -9,12 +9,18 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteRoundedIcon from "@material-ui/icons/FavoriteRounded";
 
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import { defaultAlertState, api } from "../helper";
+
 const Home = () => {
     const [data, setData] = useState([]);
     const state = useContext(UserContext).state;
+    const [left, setLeft] = useState(174 + 616);
+    const [showSnackbar, setShowSnackbar] = useState(defaultAlertState);
 
     useEffect(() => {
-        fetch("/getsubposts", {
+        fetch(`${api}/getsubposts`, {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
             }
@@ -26,7 +32,7 @@ const Home = () => {
     }, []);
 
     const likePost = (id) => {
-        fetch("/like", {
+        fetch(`${api}/like`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -48,12 +54,17 @@ const Home = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const unlikePost = (id) => {
-        fetch("/unlike", {
+        fetch(`${api}/unlike`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -75,12 +86,17 @@ const Home = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const makeComment = (text, postId) => {
-        fetch("/comment", {
+        fetch(`${api}/comment`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -103,12 +119,17 @@ const Home = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const deletePost = (postId) => {
-        fetch(`/deletepost/${postId}`, {
+        fetch(`${api}/deletepost/${postId}`, {
             method: "delete",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
@@ -120,19 +141,24 @@ const Home = () => {
                     return item._id !== res._id;
                 });
                 setData(newData);
-                // M.toast({
-                //     html: "Post deleted successfully",
-                //     classes: "#f44336 red"
-                // });
-                console.log("Post deleted successfully");
+                setShowSnackbar({
+                    show: true,
+                    message: "Post deleted successfully",
+                    severity: "info"
+                });
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const deleteComment = (postId, commentId) => {
-        fetch(`/deletecomment/${postId}/${commentId}`, {
+        fetch(`${api}/deletecomment/${postId}/${commentId}`, {
             method: "delete",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
@@ -150,9 +176,24 @@ const Home = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
+
+    const handleResize = () => {
+        let l = document.getElementsByClassName("posts-list");
+        if (l.length) {
+            l = l[0].getBoundingClientRect();
+            setLeft(l.left + l.width);
+        }
+    };
+
+    window.addEventListener("resize", handleResize);
     return (
         <Wrapper>
             <section className='posts-list'>
@@ -283,7 +324,7 @@ const Home = () => {
                     <div>Hii</div>
                 )}
             </section>
-            <section className='profile-details'>
+            <section className='profile-details' style={{ left: left }}>
                 {state && (
                     <div className='profile-container'>
                         <Link to='/profile'>
@@ -298,7 +339,6 @@ const Home = () => {
                                 </span>
                             </div>
                         </Link>
-                        <div>Suggestions</div>
                     </div>
                 )}
 
@@ -350,6 +390,20 @@ const Home = () => {
                     </ul>
                 </footer>
             </section>
+            {showSnackbar.show && (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    open={showSnackbar.show}
+                    autoHideDuration={6000}
+                    onClose={() => setShowSnackbar(defaultAlertState)}
+                    key='bottomright'>
+                    <Alert
+                        severity={showSnackbar.severity}
+                        onClose={() => setShowSnackbar(defaultAlertState)}>
+                        {showSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            )}
         </Wrapper>
     );
 };
@@ -450,7 +504,7 @@ export const Wrapper = styled.main`
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                     Roboto, Helvetica, Arial, sans-serif;
                 display: flex;
-                flex-direction: column;
+                justify-content: space-between;
                 padding-top: 5px;
 
                 .comment-record-item {

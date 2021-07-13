@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import { Wrapper } from "../Authentication/Login";
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import { defaultAlertState, api } from "../helper";
 
 function CreatePost() {
     const [body, setBody] = useState("");
@@ -11,10 +14,11 @@ function CreatePost() {
     const [previewImage, setpreviewImage] = useState();
     const [url, setUrl] = useState("");
     const history = useHistory();
+    const [showSnackbar, setShowSnackbar] = useState(defaultAlertState);
 
     useEffect(() => {
         if (url) {
-            fetch("/createpost", {
+            fetch(`${api}/createpost`, {
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",
@@ -28,19 +32,27 @@ function CreatePost() {
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.error) {
-                        // M.toast({ html: data.error, classes: "#f44336 red" });
-                        console.log(data.error);
+                        setShowSnackbar({
+                            show: true,
+                            message: data.error,
+                            severity: "error"
+                        });
                     } else {
-                        // M.toast({
-                        //     html: "Post created successfully!",
-                        //     classes: "#673ab7 deep-purple"
-                        // });
-                        console.log("Post created successfully");
+                        setShowSnackbar({
+                            show: true,
+                            message: "Post created successfully",
+                            severity: "info"
+                        });
                         history.push("/");
                     }
                 })
                 .catch((err) => {
-                    console.log(err);
+                    console.error(err);
+                    setShowSnackbar({
+                        show: true,
+                        message: "There's some error",
+                        severity: "error"
+                    });
                 });
         }
     }, [url, body, history]);
@@ -60,7 +72,12 @@ function CreatePost() {
                 setUrl(data.url);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
@@ -116,6 +133,20 @@ function CreatePost() {
                     </Button>
                 </form>
             </div>
+            {showSnackbar.show && (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    open={showSnackbar.show}
+                    autoHideDuration={6000}
+                    onClose={() => setShowSnackbar(defaultAlertState)}
+                    key='bottomright'>
+                    <Alert
+                        severity={showSnackbar.severity}
+                        onClose={() => setShowSnackbar(defaultAlertState)}>
+                        {showSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            )}
         </Wrapper>
     );
 }

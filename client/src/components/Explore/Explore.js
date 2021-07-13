@@ -10,11 +10,18 @@ import FavoriteRoundedIcon from "@material-ui/icons/FavoriteRounded";
 
 import { Wrapper } from "../Home/Home";
 
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import { defaultAlertState, api } from "../helper";
+
 const Explore = () => {
     const [data, setData] = useState([]);
+    const [left, setLeft] = useState(174 + 616);
     const state = useContext(UserContext).state;
+    const [showSnackbar, setShowSnackbar] = useState(defaultAlertState);
+
     useEffect(() => {
-        fetch("/allposts", {
+        fetch(`${api}/allposts`, {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
             }
@@ -26,7 +33,7 @@ const Explore = () => {
     }, []);
 
     const likePost = (id) => {
-        fetch("/like", {
+        fetch(`${api}/like`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -48,12 +55,17 @@ const Explore = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const unlikePost = (id) => {
-        fetch("/unlike", {
+        fetch(`${api}/unlike`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -75,12 +87,17 @@ const Explore = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const makeComment = (text, postId) => {
-        fetch("/comment", {
+        fetch(`${api}/comment`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -103,12 +120,17 @@ const Explore = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const deletePost = (postId) => {
-        fetch(`/deletepost/${postId}`, {
+        fetch(`${api}/deletepost/${postId}`, {
             method: "delete",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
@@ -120,19 +142,24 @@ const Explore = () => {
                     return item._id !== res._id;
                 });
                 setData(newData);
-                // M.toast({
-                //     html: "Post deleted successfully",
-                //     classes: "#f44336 red"
-                // });
-                console.log("Post deleted successfully");
+                setShowSnackbar({
+                    show: true,
+                    message: "Post deleted successfully",
+                    severity: "info"
+                });
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
     const deleteComment = (postId, commentId) => {
-        fetch(`/deletecomment/${postId}/${commentId}`, {
+        fetch(`${api}/deletecomment/${postId}/${commentId}`, {
             method: "delete",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
@@ -150,24 +177,39 @@ const Explore = () => {
                 setData(newData);
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
+
+    const handleResize = () => {
+        let l = document.getElementsByClassName("posts-list");
+        if (l.length) {
+            l = l[0].getBoundingClientRect();
+            setLeft(l.left + l.width);
+        }
+    };
+
+    window.addEventListener("resize", handleResize);
     return (
         <Wrapper>
             <section className='posts-list'>
                 {data.map((item) => (
                     <article className='card home-card' key={item._id}>
                         <div className='card-header'>
-                            <Avatar src={item?.postedBy?.pic} />
+                            <Avatar src={item.postedBy.pic} />
                             <h5>
                                 <Link
                                     to={
-                                        item?.postedBy?._id === state?._id
+                                        item.postedBy._id === state._id
                                             ? "/profile"
-                                            : `/profile/${item.postedBy?._id}`
+                                            : `/profile/${item.postedBy._id}`
                                     }>
-                                    {item?.postedBy?.name}
+                                    {item.postedBy.name}
                                 </Link>
                                 {item.postedBy._id === state._id && (
                                     <DeleteIcon
@@ -186,12 +228,12 @@ const Explore = () => {
                         <div className='card-content'>
                             <IconButton
                                 style={
-                                    item.likes.includes(state?._id)
+                                    item.likes.includes(state._id)
                                         ? { color: "red" }
                                         : { color: "black" }
                                 }
                                 onClick={() => {
-                                    item.likes.includes(state?._id)
+                                    item.likes.includes(state._id)
                                         ? unlikePost(item._id)
                                         : likePost(item._id);
                                 }}>
@@ -255,7 +297,7 @@ const Explore = () => {
                     </article>
                 ))}
             </section>
-            <section className='profile-details'>
+            <section className='profile-details' style={{ left: left }}>
                 {state && (
                     <div className='profile-container'>
                         <Link to='/profile'>
@@ -270,7 +312,6 @@ const Explore = () => {
                                 </span>
                             </div>
                         </Link>
-                        <div>Suggestions</div>
                     </div>
                 )}
 
@@ -322,6 +363,20 @@ const Explore = () => {
                     </ul>
                 </footer>
             </section>
+            {showSnackbar.show && (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    open={showSnackbar.show}
+                    autoHideDuration={6000}
+                    onClose={() => setShowSnackbar(defaultAlertState)}
+                    key='bottomright'>
+                    <Alert
+                        severity={showSnackbar.severity}
+                        onClose={() => setShowSnackbar(defaultAlertState)}>
+                        {showSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            )}
         </Wrapper>
     );
 };

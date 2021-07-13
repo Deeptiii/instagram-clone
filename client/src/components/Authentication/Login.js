@@ -6,6 +6,9 @@ import { UserContext } from "../../App";
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import { defaultAlertState, api } from "../helper";
 
 const Login = () => {
     const dispatch = useContext(UserContext).dispatch;
@@ -13,6 +16,7 @@ const Login = () => {
     const histoy = useHistory();
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const [showSnackbar, setShowSnackbar] = useState(defaultAlertState);
 
     const postData = () => {
         if (
@@ -20,13 +24,18 @@ const Login = () => {
                 email
             )
         ) {
-            // M.toast({ html: "Invalid email", classes: "#f44336 red" });
+            setShowSnackbar({
+                show: true,
+                message: "Invalid email",
+                severity: "error"
+            });
             return;
         }
-        fetch("/signin", {
+        fetch(`${api}/signin`, {
             method: "post",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
             },
             body: JSON.stringify({
                 email,
@@ -36,20 +45,30 @@ const Login = () => {
             .then((res) => res.json())
             .then((data) => {
                 if (data.error) {
-                    console.log(data.error);
+                    setShowSnackbar({
+                        show: true,
+                        message: data.error,
+                        severity: "error"
+                    });
                 } else {
                     localStorage.setItem("jwt", data.token);
                     localStorage.setItem("user", JSON.stringify(data.user));
                     dispatch({ type: "SET_USER", payload: data.user });
-                    // M.toast({
-                    //     html: "Signed in successfully!",
-                    //     classes: "#673ab7 deep-purple"
-                    // });
+                    setShowSnackbar({
+                        show: true,
+                        message: "Signed in successfully!",
+                        severity: "success"
+                    });
                     histoy.push("/");
                 }
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     };
 
@@ -70,7 +89,6 @@ const Login = () => {
                             src='https://www.instagram.com/static/images/web/mobile_nav_type_logo-2x.png/1b47f9d0e595.png'
                             alt='logo'
                         />
-                        <h2 className='form-header'>Log In</h2>
                         <TextField
                             label='Email'
                             type='email'
@@ -101,6 +119,20 @@ const Login = () => {
                     Don't have an account? <Link to='/signup'>Sign Up</Link>
                 </div>
             </div>
+            {showSnackbar.show && (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    open={showSnackbar.show}
+                    autoHideDuration={6000}
+                    onClose={() => setShowSnackbar(defaultAlertState)}
+                    key='bottomright'>
+                    <Alert
+                        severity={showSnackbar.severity}
+                        onClose={() => setShowSnackbar(defaultAlertState)}>
+                        {showSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            )}
         </Wrapper>
     );
 };

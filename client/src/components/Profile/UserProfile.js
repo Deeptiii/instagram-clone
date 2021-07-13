@@ -4,6 +4,7 @@ import { UserContext } from "../../App";
 import { useParams } from "react-router-dom";
 import { Wrapper } from "./Profile";
 import { Avatar, Button } from "@material-ui/core";
+import { api } from "../helper";
 
 function UserProfile() {
     const [userProfile, setProfile] = useState(null);
@@ -23,7 +24,7 @@ function UserProfile() {
     }, [state, userProfile]);
 
     useEffect(() => {
-        fetch(`/user/${userid}`, {
+        fetch(`${api}/user/${userid}`, {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
             }
@@ -68,7 +69,7 @@ function UserProfile() {
             });
     };
     const unfollowUser = () => {
-        fetch("/unfollow", {
+        fetch(`${api}/unfollow`, {
             method: "put",
             headers: {
                 "Content-Type": "application/json",
@@ -171,15 +172,17 @@ function UserProfile() {
                             </div>
                         </div>
                     </div>
-                    <div className='gallery'>
-                        {userProfile.posts.map((item) => (
-                            <img
-                                key={item._id}
-                                className='item'
-                                src={item.photo}
-                                alt={item.title}
-                            />
-                        ))}
+                    <div className='gallery-container'>
+                        <div className='gallery'>
+                            {userProfile.posts.map((item) => (
+                                <img
+                                    key={item._id}
+                                    className='item'
+                                    src={item.photo}
+                                    alt={item.title}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}

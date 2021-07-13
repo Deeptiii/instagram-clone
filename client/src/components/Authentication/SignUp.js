@@ -6,11 +6,16 @@ import Button from "@material-ui/core/Button";
 
 import { Wrapper } from "./Login";
 
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import { defaultAlertState, api } from "../helper";
+
 const SignUp = () => {
     const history = useHistory();
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const [showSnackbar, setShowSnackbar] = useState(defaultAlertState);
 
     const uploadFields = useCallback(() => {
         if (
@@ -18,10 +23,14 @@ const SignUp = () => {
                 email
             )
         ) {
-            // M.toast({ html: "Invalid email", classes: "#f44336 red" });
+            setShowSnackbar({
+                show: true,
+                message: "Invalid email",
+                severity: "error"
+            });
             return;
         }
-        fetch("/signup", {
+        fetch(`${api}/signup`, {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
@@ -34,21 +43,32 @@ const SignUp = () => {
         })
             .then((res) => res.json())
             .then((data) => {
-                console.log(data);
                 if (data.error) {
-                    // M.toast({ html: data.error, classes: "#f44336 red" });
-                    console.log(data.error);
+                    setShowSnackbar({
+                        show: true,
+                        message: data.error,
+                        severity: "error"
+                    });
                 } else {
                     // M.toast({
                     //     html: data.message,
                     //     classes: "#673ab7 deep-purple"
                     // });
-                    console.log("Signup suceess", data.message);
+                    setShowSnackbar({
+                        show: true,
+                        message: data.message,
+                        severity: "success"
+                    });
                     history.push("/login");
                 }
             })
             .catch((err) => {
-                console.log(err);
+                console.error(err);
+                setShowSnackbar({
+                    show: true,
+                    message: "There's some error",
+                    severity: "error"
+                });
             });
     }, [email, history, name, password]);
 
@@ -66,7 +86,6 @@ const SignUp = () => {
                             src='https://www.instagram.com/static/images/web/mobile_nav_type_logo-2x.png/1b47f9d0e595.png'
                             alt='logo'
                         />
-                        <h2 className='form-header'>Log In</h2>
                         <TextField
                             label='Email'
                             type='email'
@@ -104,6 +123,20 @@ const SignUp = () => {
                     Already have an account? <Link to='/login'>Log in</Link>
                 </div>
             </div>
+            {showSnackbar.show && (
+                <Snackbar
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    open={showSnackbar.show}
+                    autoHideDuration={6000}
+                    onClose={() => setShowSnackbar(defaultAlertState)}
+                    key='bottomright'>
+                    <Alert
+                        severity={showSnackbar.severity}
+                        onClose={() => setShowSnackbar(defaultAlertState)}>
+                        {showSnackbar.message}
+                    </Alert>
+                </Snackbar>
+            )}
         </Wrapper>
     );
 };

@@ -2,12 +2,15 @@ import React, { useState, useContext, useEffect } from "react";
 import styled from "styled-components";
 import { UserContext } from "../../App";
 import HomeRoundedIcon from "@material-ui/icons/HomeRounded";
+import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
+import ExploreIcon from "@material-ui/icons/Explore";
 import SearchIcon from "@material-ui/icons/Search";
 import Avatar from "@material-ui/core/Avatar";
 import { InputBase, Button, Menu, MenuItem } from "@material-ui/core";
 
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useLocation } from "react-router-dom";
+import { api } from "../helper";
 
 const Navbar = () => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -16,10 +19,13 @@ const Navbar = () => {
     const { state, dispatch } = useContext(UserContext);
     const [search, setSearch] = useState("");
     const [users, setUsers] = useState([]);
+    const [path, setPath] = useState("/");
+
+    const location = useLocation();
 
     useEffect(() => {
-        // M.Modal.init(searchModal.current);
-    }, []);
+        setPath(location.pathname);
+    }, [location]);
 
     const handleOpen = (event) => {
         setAnchorEl2(event.target);
@@ -46,7 +52,7 @@ const Navbar = () => {
     const fetchUsers = (query) => {
         setSearch(query);
         if (query.length) {
-            fetch("/search-user", {
+            fetch(`${api}/search-user`, {
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",
@@ -69,10 +75,14 @@ const Navbar = () => {
         if (state) {
             return [
                 <Link to='/' key='1'>
-                    <HomeRoundedIcon />
+                    {path === "/" ? <HomeRoundedIcon /> : <HomeOutlinedIcon />}
                 </Link>,
                 <Link to='/explore' key='2'>
-                    <ExploreOutlinedIcon />
+                    {path === "/explore" ? (
+                        <ExploreIcon className='explore' />
+                    ) : (
+                        <ExploreOutlinedIcon className='explore' />
+                    )}
                 </Link>,
                 <Button
                     style={{ padding: 0, minWidth: "unset" }}
@@ -243,7 +253,12 @@ const Wrapper = styled.nav`
         }
 
         svg {
+            fill: #000;
             font-size: 2rem;
+        }
+
+        .explore {
+            font-size: 1.7rem;
         }
 
         .MuiPopover-paper {

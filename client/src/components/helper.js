@@ -4,4 +4,4 @@ export const defaultAlertState = {
     severity: "info"
 };
 
-export const api = "http://localhost:5000";
+export const api = "https://instagm-backend.herokuapp.com";

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { UserContext } from "../../App";
 import styled from "styled-components";
+import { api } from "../helper";
 
 import { Avatar, Button } from "@material-ui/core";
 
@@ -10,7 +11,7 @@ const Profile = () => {
     const [image, setImage] = useState("");
 
     useEffect(() => {
-        fetch("/myposts", {
+        fetch(`${api}/myposts`, {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("jwt")
             }
@@ -34,7 +35,7 @@ const Profile = () => {
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    fetch("/updatepic", {
+                    fetch(`${api}/updatepic`, {
                         method: "put",
                         headers: {
                             "Content-Type": "application/json",
@@ -55,11 +56,10 @@ const Profile = () => {
                                 type: "UPDATEPIC",
                                 payload: result.pic
                             });
-                            console.log(result);
                         });
                 })
                 .catch((err) => {
-                    console.log(err);
+                    console.error(err);
                 });
         }
     }, [image]);
@@ -87,25 +87,6 @@ const Profile = () => {
                                 alt=''
                             />
                         </Button>
-
-                        {/* <div className='file-field'>
-                            <div className='btn #2196f3 blue'>
-                                <span>Upload Profile Picture</span>
-                                <input
-                                    type='file'
-                                    onChange={(e) =>
-                                        uploadProfilePic(e.target.files[0])
-                                    }
-                                />
-                            </div>
-                            <div className='file-path-wrapper'>
-                                <input
-                                    style={{ display: "none" }}
-                                    className='file-path validate'
-                                    type='text'
-                                />
-                            </div>
-                        </div> */}
                     </div>
                     <div className='profile__info'>
                         <span className='profile_name'>
@@ -144,15 +125,17 @@ const Profile = () => {
                         </div>
                     </div>
                 </div>
-                <div className='gallery'>
-                    {mypics.map((item) => (
-                        <img
-                            key={item._id}
-                            className='item'
-                            src={item.photo}
-                            alt={item.title}
-                        />
-                    ))}
+                <div className='gallery-container'>
+                    <div className='gallery'>
+                        {mypics.map((item) => (
+                            <img
+                                key={item._id}
+                                className='item'
+                                src={item.photo}
+                                alt={item.title}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </Wrapper>
@@ -237,11 +220,13 @@ export const Wrapper = styled.main`
         }
     }
 
-    .gallery {
+    .gallery-container {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-
+        justify-content: center;
+        align-items: center;
+    }
+    .gallery {
+        max-width: 940px;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem 1.5rem;
